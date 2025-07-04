@@ -1705,3 +1705,48 @@ async function injectRequestPanel() {
     console.error('注入右侧面板失败:', e);
   }
 }
+
+// ===== 国际化与语言切换 =====
+function renderLang() {
+  document.title = t('optionsTitle');
+  const pageTitle = document.getElementById('pageTitle');
+  if (pageTitle) pageTitle.textContent = t('optionsTitle');
+  const mainTitle = document.getElementById('mainTitle');
+  if (mainTitle) mainTitle.textContent = t('optionsTitle');
+  const extStatusTitle = document.getElementById('extStatusTitle');
+  if (extStatusTitle) extStatusTitle.textContent = t('extStatusTitle');
+  const refreshStatusBtn = document.getElementById('refreshStatusBtn');
+  if (refreshStatusBtn) refreshStatusBtn.textContent = t('refreshStatusBtn');
+  const protoTitle = document.getElementById('protoTitle');
+  if (protoTitle) protoTitle.textContent = t('protoTitle');
+  const protoSwitchLabel = document.getElementById('protoSwitchLabel');
+  if (protoSwitchLabel) protoSwitchLabel.textContent = t('protoSwitchLabel');
+  const refreshProtoStatusBtn = document.getElementById('refreshProtoStatusBtn');
+  if (refreshProtoStatusBtn) refreshProtoStatusBtn.textContent = t('refreshProtoStatusBtn');
+  const visualTabBtn = document.getElementById('visualTabBtn');
+  if (visualTabBtn) visualTabBtn.textContent = t('visualTabBtn');
+  const apiMappingTabBtn = document.getElementById('apiMappingTabBtn');
+  if (apiMappingTabBtn) apiMappingTabBtn.textContent = t('apiMappingTabBtn');
+  const requestInterceptTabBtn = document.getElementById('requestInterceptTabBtn');
+  if (requestInterceptTabBtn) requestInterceptTabBtn.textContent = t('requestInterceptTabBtn');
+  const jsonTabBtn = document.getElementById('jsonTabBtn');
+  if (jsonTabBtn) jsonTabBtn.textContent = t('jsonTabBtn');
+  const helpTabBtn = document.getElementById('helpTabBtn');
+  if (helpTabBtn) helpTabBtn.textContent = t('helpTabBtn');
+  // ...后续补充其它UI文本...
+}
+
+function setupLangSelector() {
+  const langSelect = document.getElementById('langSelect');
+  if (!langSelect) return;
+  langSelect.value = getLang();
+  langSelect.addEventListener('change', function() {
+    localStorage.setItem('ura-proxy-lang', this.value);
+    location.reload();
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  setupLangSelector();
+  renderLang();
+});

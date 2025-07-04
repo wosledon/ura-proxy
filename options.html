@@ -326,7 +326,6 @@
   </div>
   <div class="container">
     <h1 id="mainTitle"></h1>
-    
     <div id="alertContainer"></div>
     
     <!-- 扩展状态显示 -->
@@ -713,33 +712,6 @@ fetch('https://api.example.com/api/v1/user/123') // 示例 / Example
       </ul>
     </div>
   </div>
-  
-  <script>
-    // 语言切换逻辑
-    document.getElementById('langSelect').value = getLang();
-    document.getElementById('langSelect').addEventListener('change', function() {
-      localStorage.setItem('ura-proxy-lang', this.value);
-      location.reload();
-    });
-    // 页面加载时渲染所有国际化文本
-    function renderLang() {
-      document.title = t('optionsTitle');
-      document.getElementById('pageTitle').textContent = t('optionsTitle');
-      document.getElementById('mainTitle').textContent = t('optionsTitle');
-      document.getElementById('extStatusTitle').textContent = t('extStatusTitle');
-      document.getElementById('refreshStatusBtn').textContent = t('refreshStatusBtn');
-      document.getElementById('protoTitle').textContent = t('protoTitle');
-      document.getElementById('protoSwitchLabel').textContent = t('protoSwitchLabel');
-      document.getElementById('refreshProtoStatusBtn').textContent = t('refreshProtoStatusBtn');
-      document.getElementById('visualTabBtn').textContent = t('visualTabBtn');
-      document.getElementById('apiMappingTabBtn').textContent = t('apiMappingTabBtn');
-      document.getElementById('requestInterceptTabBtn').textContent = t('requestInterceptTabBtn');
-      document.getElementById('jsonTabBtn').textContent = t('jsonTabBtn');
-      document.getElementById('helpTabBtn').textContent = t('helpTabBtn');
-      // ...其余所有需要国际化的元素同理渲染...
-    }
-    window.addEventListener('DOMContentLoaded', renderLang);
-  </script>
   <script src="options.js"></script>
 </body>
 </html>
