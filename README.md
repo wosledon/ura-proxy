@@ -1,5 +1,7 @@
 # URA Proxy
 
+[English README](./README.en.md)
+
 🔄 将线上前端的API请求透明地重定向到本地开发服务器的Chrome浏览器扩展
 
 ![Chrome Extension](https://img.shields.io/badge/Chrome%20Extension-v1.0.0-blue)

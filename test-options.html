@@ -105,9 +105,9 @@
     <button id="testLoadRulesBtn">测试加载规则</button>
     
     <h2>快速添加规则测试</h2>
-    <input type="text" id="quickDomain" placeholder="api.example.com" value="test.api.com">
-    <input type="text" id="quickPath" placeholder="/api/v1" value="/test">
-    <input type="number" id="quickPort" placeholder="3000" value="8080">
+    <input type="text" id="quickDomain" placeholder="api.example.com / 示例: api.example.com" value="test.api.com">
+    <input type="text" id="quickPath" placeholder="/api/v1 / 示例: /test" value="/test">
+    <input type="number" id="quickPort" placeholder="3000 / 示例: 8080" value="8080">
     <button id="addQuickRuleBtn" class="btn-success">添加规则</button>
     
     <h2>当前规则</h2>
@@ -176,7 +176,7 @@
             }
           },
           "condition": {
-            "regexFilter": "^https://centerapi\\.test\\.shijizhongyun\\.com/financeApi(.*)",
+            "regexFilter": "^https://your-api-domain\\.com(.*)",
             "resourceTypes": ["xmlhttprequest"]
           }
         }

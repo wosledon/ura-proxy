@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>API重定向配置管理</title>
+  <title id="pageTitle"></title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -314,39 +314,45 @@
       flex: none;
     }
   </style>
+  <script src="i18n.js"></script>
 </head>
 <body>
+  <div class="lang-select" style="float:right; margin-bottom:10px;">
+    <label for="langSelect">🌐</label>
+    <select id="langSelect">
+      <option value="zh">中文</option>
+      <option value="en">English</option>
+    </select>
+  </div>
   <div class="container">
-    <h1>🔧 API重定向配置管理</h1>
+    <h1 id="mainTitle"></h1>
     
     <div id="alertContainer"></div>
     
     <!-- 扩展状态显示 -->
     <div class="alert alert-info">
-      <strong>🔄 扩展状态：</strong>
-      <span id="extensionStatus">检查中...</span>
-      <button id="refreshStatusBtn" style="margin-left: 10px; padding: 4px 8px; font-size: 12px;">刷新状态</button>
+      <strong>🔄 <span id="extStatusTitle"></span></strong>
+      <span id="extensionStatus">...</span>
+      <button id="refreshStatusBtn" style="margin-left: 10px; padding: 4px 8px; font-size: 12px;"></button>
     </div>
 
     <!-- protobuf转换配置 -->
     <div class="alert alert-warning">
-      <strong>🔧 协议转换配置：</strong>
+      <strong>🔧 <span id="protoTitle"></span></strong>
       <label style="display: inline; margin-left: 15px; margin-right: 10px;">
         <input type="checkbox" id="enableProtoConversion" style="width: auto; margin-right: 5px;">
-        启用 Protobuf → JSON 转换
+        <span id="protoSwitchLabel"></span>
       </label>
-      <button id="refreshProtoStatusBtn" style="margin-left: 10px; padding: 4px 8px; font-size: 12px;">刷新转换状态</button>
-      <div id="protoConversionStatus" style="margin-top: 8px; font-size: 13px; color: #666;">
-        正在检查转换状态...
-      </div>
+      <button id="refreshProtoStatusBtn" style="margin-left: 10px; padding: 4px 8px; font-size: 12px;"></button>
+      <div id="protoConversionStatus" style="margin-top: 8px; font-size: 13px; color: #666;">...</div>
     </div>
     
     <div class="tabs">
-      <div class="tab active" id="visualTabBtn">📋 可视化编辑</div>
-      <div class="tab" id="apiMappingTabBtn">🔄 接口映射</div>
-      <div class="tab" id="requestInterceptTabBtn">🔍 请求解析</div>
-      <div class="tab" id="jsonTabBtn">💻 JSON编辑</div>
-      <div class="tab" id="helpTabBtn">❓ 帮助说明</div>
+      <div class="tab active" id="visualTabBtn"></div>
+      <div class="tab" id="apiMappingTabBtn"></div>
+      <div class="tab" id="requestInterceptTabBtn"></div>
+      <div class="tab" id="jsonTabBtn"></div>
+      <div class="tab" id="helpTabBtn"></div>
     </div>
     
     <!-- 可视化编辑标签页 -->
@@ -357,8 +363,8 @@
         <h3>➕ 快速添加重定向规则</h3>
         <div class="form-row">
           <div class="form-col">
-            <label>源域名 (例: api.example.com)</label>
-            <input type="text" id="quickDomain" placeholder="api.example.com">
+            <label>源域名 (例: api.example.com / Example: api.example.com)</label>
+            <input type="text" id="quickDomain" placeholder="api.example.com / Example: api.example.com">
           </div>
           <div class="form-col">
             <label>源路径 (例: /api/v1 或留空)</label>
@@ -423,8 +429,8 @@
             <input type="text" id="mappingTargetPath" placeholder="/api/v2/user">
           </div>
           <div class="form-col">
-            <label>域名 (例: api.example.com)</label>
-            <input type="text" id="mappingDomain" placeholder="api.example.com">
+            <label>域名 (例: api.example.com / Example: api.example.com)</label>
+            <input type="text" id="mappingDomain" placeholder="api.example.com / Example: api.example.com">
           </div>
           <div class="form-col">
             <label>本地端口</label>
@@ -490,7 +496,7 @@
           </div>
           <div class="form-col">
             <label>拦截域名过滤 (留空表示所有域名)</label>
-            <input type="text" id="interceptDomainFilter" placeholder="例: api.example.com">
+            <input type="text" id="interceptDomainFilter" placeholder="例: api.example.com / Example: api.example.com">
           </div>
         </div>
         <div class="form-row" style="margin-top: 15px;">
@@ -564,7 +570,7 @@
       </div>
       
       <h3>🎯 规则配置说明</h3>
-      <p><strong>源域名：</strong>要拦截的API域名，如 <code>api.example.com</code></p>
+      <p><strong>源域名：</strong>要拦截的API域名，如 <code>api.example.com</code> / <strong>Source Domain:</strong> The API domain to intercept, e.g. <code>api.example.com</code></p>
       <p><strong>源路径：</strong>可选，指定路径前缀，如 <code>/api/v1</code></p>
       <p><strong>本地端口：</strong>重定向到本地服务器的端口号</p>
       <p><strong>Protobuf转换：</strong>适用于前端使用protobuf格式与网关通信，但本地开发环境使用JSON格式的场景</p>
@@ -581,10 +587,10 @@
         <ul>
           <li>源路径：<code>/api/v1/user</code></li>
           <li>目标路径：<code>/api/v2/user</code></li>
-          <li>域名：<code>api.example.com</code></li>
+          <li>域名：<code>api.example.com</code> / Domain: <code>api.example.com</code></li>
           <li>本地端口：<code>3000</code></li>
         </ul>
-        <p><strong>结果：</strong>前端请求 <code>https://api.example.com/api/v1/user</code> 会被重定向到 <code>http://localhost:3000/api/v2/user</code></p>
+        <p><strong>结果：</strong>前端请求 <code>https://api.example.com/api/v1/user</code> 会被重定向到 <code>http://localhost:3000/api/v2/user</code> / <strong>Result:</strong> Frontend request <code>https://api.example.com/api/v1/user</code> will be redirected to <code>http://localhost:3000/api/v2/user</code></p>
       </div>
       
       <h3>🔧 Protobuf 转换功能</h3>
@@ -616,7 +622,7 @@
   
         <p><strong>测试接口映射：</strong></p>
         <pre><code>// 假设配置了 /api/v1/user → /api/v2/user 的映射
-fetch('https://api.example.com/api/v1/user/123')
+fetch('https://api.example.com/api/v1/user/123') // 示例 / Example
   .then(response => {
     console.log('✅ 映射成功！实际请求:', response.url);
     // 实际会请求到: http://localhost:3000/api/v2/user/123
@@ -647,7 +653,7 @@ fetch('https://api.example.com/api/v1/user/123')
         
         <p><strong>配置示例：</strong></p>
         <ul>
-          <li><code>https://api.example.com/*</code> - 拦截该域名下所有请求</li>
+          <li><code>https://api.example.com/*</code> - 拦截该域名下所有请求 / Intercept all requests under this domain</li>
           <li><code>*/api/v1/*</code> - 拦截所有包含 /api/v1/ 的请求</li>
           <li><code>https://*/user*</code> - 拦截所有以 user 开头的请求路径</li>
         </ul>
@@ -708,6 +714,32 @@ fetch('https://api.example.com/api/v1/user/123')
     </div>
   </div>
   
+  <script>
+    // 语言切换逻辑
+    document.getElementById('langSelect').value = getLang();
+    document.getElementById('langSelect').addEventListener('change', function() {
+      localStorage.setItem('ura-proxy-lang', this.value);
+      location.reload();
+    });
+    // 页面加载时渲染所有国际化文本
+    function renderLang() {
+      document.title = t('optionsTitle');
+      document.getElementById('pageTitle').textContent = t('optionsTitle');
+      document.getElementById('mainTitle').textContent = t('optionsTitle');
+      document.getElementById('extStatusTitle').textContent = t('extStatusTitle');
+      document.getElementById('refreshStatusBtn').textContent = t('refreshStatusBtn');
+      document.getElementById('protoTitle').textContent = t('protoTitle');
+      document.getElementById('protoSwitchLabel').textContent = t('protoSwitchLabel');
+      document.getElementById('refreshProtoStatusBtn').textContent = t('refreshProtoStatusBtn');
+      document.getElementById('visualTabBtn').textContent = t('visualTabBtn');
+      document.getElementById('apiMappingTabBtn').textContent = t('apiMappingTabBtn');
+      document.getElementById('requestInterceptTabBtn').textContent = t('requestInterceptTabBtn');
+      document.getElementById('jsonTabBtn').textContent = t('jsonTabBtn');
+      document.getElementById('helpTabBtn').textContent = t('helpTabBtn');
+      // ...其余所有需要国际化的元素同理渲染...
+    }
+    window.addEventListener('DOMContentLoaded', renderLang);
+  </script>
   <script src="options.js"></script>
 </body>
 </html>

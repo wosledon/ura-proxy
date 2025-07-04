@@ -306,7 +306,7 @@ function getDefaultRules() {
         }
       },
       "condition": {
-        "regexFilter": "^https://centerapi\\.test\\.shijizhongyun\\.com/financeApi(.*)",
+        "regexFilter": "^https://your-api-domain\\.com(.*)",
         "resourceTypes": ["xmlhttprequest"]
       },
       "protoConversion": false
