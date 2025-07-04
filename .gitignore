@@ -1,0 +1,34 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# VSCode
+.vscode/
+
+# Mac/Windows
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Build/Dist
+/dist/
+/build/
+
+# Chrome Extension Artifacts
+*.crx
+*.pem
+
+# Local backups
+*.bak
+*.swp
+
+# Misc
+.env
+.idea/
+*.iml
+
+# Metadata
+_metadata/

@@ -5,20 +5,6 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "regexSubstitution": "http://localhost:8091\\1"
-      }
-    },
-    "condition": {
-      "regexFilter": "^https://centerapi\\.test\\.shijizhongyun\\.com/financeApi(.*)",
-      "resourceTypes": ["xmlhttprequest"]
-    }
-  },
-  {
-    "id": 2,
-    "priority": 1,
-    "action": {
-      "type": "redirect",
-      "redirect": {
         "regexSubstitution": "http://localhost:3000\\1"
       }
     },

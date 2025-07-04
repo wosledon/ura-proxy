@@ -1,4 +1,4 @@
-# API请求重定向Chrome扩展
+# URA Proxy
 
 🔄 将线上前端的API请求透明地重定向到本地开发服务器的Chrome浏览器扩展
 
@@ -49,12 +49,12 @@
 
 扩展默认配置了两个重定向规则：
 
-### 📍 规则1: FinanceAPI重定向
+### 📍 规则1: 示例API重定向
 ```
-源地址: https://centerapi.test.shijizhongyun.com/financeApi/*
+源地址: https://example.com/api/*
 目标地址: http://localhost:8091/*
 ```
-**用途**: 将金融API请求重定向到本地8091端口
+**用途**: 将线上API请求重定向到本地8091端口
 
 ### 📍 规则2: 通用API重定向  
 ```
@@ -186,7 +186,7 @@ CORS_ALLOWED_ORIGINS = [
 ### 查看扩展日志
 
 1. 访问 `chrome://extensions/`
-2. 找到"API请求重定向插件"
+2. 找到"URA Proxy"
 3. 点击"service worker"链接
 4. 在控制台查看重定向日志
 
@@ -195,8 +195,8 @@ CORS_ALLOWED_ORIGINS = [
 在浏览器控制台执行以下代码：
 
 ```javascript
-// 测试预设的financeApi重定向
-fetch('https://centerapi.test.shijizhongyun.com/financeApi/test')
+// 测试预设的API重定向
+fetch('https://example.com/api/test')
   .then(response => {
     console.log('✅ 重定向成功！响应来源:', response.url);
     return response.json();
