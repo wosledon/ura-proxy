@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API重定向测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #0b7dda;
+        }
+        .result {
+            background: #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔄 API重定向测试页面</h1>
+    
+    <div class="container">
+        <h2>测试您的重定向规则</h2>
+        <p>点击下面的按钮来测试API重定向是否正常工作：</p>
+        
+        <button class="btn" onclick="testApi1()">测试 centerapi.test.shijizhongyun.com</button>
+        <button class="btn" onclick="testApi2()">测试 api.example.com</button>
+        <button class="btn" onclick="clearResults()">清空结果</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <div class="container">
+        <h2>📋 当前规则配置</h2>
+        <div class="result">
+规则1: 
+从: ^https://centerapi\.test\.shijizhongyun\.com/financeApi(.*)
+到: http://localhost:8091\1
+优先级: 1 | 类型: xmlhttprequest
+
+规则2:
+从: ^https://api\.example\.com(.*)  
+到: http://localhost:3000\1
+优先级: 1 | 类型: xmlhttprequest
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>💡 使用说明</h2>
+        <ul>
+            <li>确保浏览器扩展已启用</li>
+            <li>确保本地服务器（localhost:8091或localhost:3000）正在运行</li>
+            <li>打开浏览器开发者工具的网络标签页查看请求重定向</li>
+            <li>如果重定向不生效，请检查扩展设置</li>
+        </ul>
+    </div>
+
+    <script>
+        function addResult(message, isSuccess = true) {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${isSuccess ? 'success' : 'error'}`;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            results.appendChild(div);
+        }
+
+        function testApi1() {
+            addResult('开始测试 centerapi.test.shijizhongyun.com 重定向...');
+            
+            fetch('https://centerapi.test.shijizhongyun.com/financeApi/test')
+                .then(response => {
+                    addResult(`✅ 请求成功! 状态: ${response.status}, URL: ${response.url}`, true);
+                    return response.text();
+                })
+                .then(data => {
+                    addResult(`响应数据: ${data.substring(0, 200)}...`, true);
+                })
+                .catch(error => {
+                    addResult(`❌ 请求失败: ${error.message}`, false);
+                    addResult('这可能是正常的，因为本地服务器可能未运行', false);
+                });
+        }
+
+        function testApi2() {
+            addResult('开始测试 api.example.com 重定向...');
+            
+            fetch('https://example.com/api/test')
+                .then(response => {
+                    addResult(`✅ 请求成功! 状态: ${response.status}, URL: ${response.url}`, true);
+                    return response.text();
+                })
+                .then(data => {
+                    addResult(`响应数据: ${data.substring(0, 200)}...`, true);
+                })
+                .catch(error => {
+                    addResult(`❌ 请求失败: ${error.message}`, false);
+                    addResult('这可能是正常的，因为本地服务器可能未运行', false);
+                });
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        // 页面加载时显示欢迎信息
+        window.addEventListener('load', function() {
+            addResult('测试页面已加载，可以开始测试API重定向功能');
+        });
+    </script>
+</body>
+</html>

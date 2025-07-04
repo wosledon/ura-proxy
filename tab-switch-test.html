@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>标签页切换测试</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+    
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 20px;
+    }
+    
+    .tab {
+      padding: 12px 24px;
+      background: #f8f9fa;
+      border: 1px solid #ddd;
+      border-bottom: none;
+      cursor: pointer;
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
+      margin-right: 2px;
+    }
+    
+    .tab.active {
+      background: white;
+      color: #2196F3;
+      font-weight: bold;
+    }
+    
+    .tab-content {
+      display: none;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-top: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .alert {
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 4px;
+      border: 1px solid transparent;
+    }
+    
+    .alert-success {
+      color: #155724;
+      background-color: #d4edda;
+      border-color: #c3e6cb;
+    }
+    
+    .alert-info {
+      color: #0c5460;
+      background-color: #d1ecf1;
+      border-color: #bee5eb;
+    }
+    
+    button {
+      background: #2196F3;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    
+    .rule-item {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 15px;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 标签页切换功能测试</h1>
+  
+  <div id="alertContainer"></div>
+  
+  <div class="tabs">
+    <div class="tab active" id="tab1Btn">📋 可视化编辑</div>
+    <div class="tab" id="tab2Btn">💻 JSON编辑</div>
+    <div class="tab" id="tab3Btn">❓ 帮助说明</div>
+  </div>
+  
+  <!-- 可视化编辑标签页 -->
+  <div id="tab1Tab" class="tab-content active">
+    <h2>可视化编辑页面</h2>
+    <div id="rulesStatus" class="alert alert-info" style="display: none;">
+      正在加载规则列表...
+    </div>
+    <div id="rulesList">
+      <div class="rule-item">
+        <strong>测试规则 1:</strong><br>
+        从: https://api.example.com/*<br>
+        到: http://localhost:3000/*
+      </div>
+      <div class="rule-item">
+        <strong>测试规则 2:</strong><br>
+        从: https://test.api.com/*<br>
+        到: http://localhost:8080/*
+      </div>
+    </div>
+    <button id="refreshRulesBtn">🔄 刷新规则列表</button>
+  </div>
+  
+  <!-- JSON编辑标签页 -->
+  <div id="tab2Tab" class="tab-content">
+    <h2>JSON编辑页面</h2>
+    <textarea style="width: 100%; height: 200px; font-family: monospace;" readonly>
+[
+  {
+    "id": 1,
+    "condition": {
+      "regexFilter": "^https://api\\.example\\.com(.*)"
+    },
+    "action": {
+      "redirect": {
+        "regexSubstitution": "http://localhost:3000\\1"
+      }
+    }
+  }
+]
+    </textarea>
+  </div>
+  
+  <!-- 帮助说明标签页 -->
+  <div id="tab3Tab" class="tab-content">
+    <h2>帮助说明页面</h2>
+    <div class="alert alert-info">
+      <p>这是一个测试页面，用于验证标签页切换功能是否正常工作。</p>
+      <p>请按以下步骤测试：</p>
+      <ol>
+        <li>点击不同的标签页，观察内容是否正确切换</li>
+        <li>从"可视化编辑"切换到其他标签页，再切换回来</li>
+        <li>检查规则列表是否仍然显示</li>
+        <li>点击"刷新规则列表"按钮测试功能</li>
+      </ol>
+    </div>
+  </div>
+  
+  <script>
+    // 模拟规则数据
+    let testRules = [
+      { id: 1, name: '测试规则 1', from: 'https://api.example.com/*', to: 'http://localhost:3000/*' },
+      { id: 2, name: '测试规则 2', from: 'https://test.api.com/*', to: 'http://localhost:8080/*' }
+    ];
+    
+    // 显示提示消息
+    function showAlert(message, type = 'success') {
+      const container = document.getElementById('alertContainer');
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type}`;
+      alert.textContent = message;
+      
+      container.appendChild(alert);
+      
+      setTimeout(() => {
+        if (alert.parentNode) {
+          alert.parentNode.removeChild(alert);
+        }
+      }, 3000);
+    }
+    
+    // 切换标签页
+    function switchTab(tabName) {
+      console.log('切换到标签页:', tabName);
+      
+      // 隐藏所有标签页内容
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // 移除所有标签的active状态
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // 显示选中的标签页
+      document.getElementById(tabName + 'Tab').classList.add('active');
+      
+      // 激活选中的标签
+      let activeTabId = '';
+      if (tabName === 'tab1') {
+        activeTabId = 'tab1Btn';
+      } else if (tabName === 'tab2') {
+        activeTabId = 'tab2Btn';
+      } else if (tabName === 'tab3') {
+        activeTabId = 'tab3Btn';
+      }
+      
+      const activeTab = document.getElementById(activeTabId);
+      if (activeTab) {
+        activeTab.classList.add('active');
+      }
+      
+      // 根据切换的标签页执行相应的初始化
+      if (tabName === 'tab1') {
+        // 切换到可视化编辑页面时，重新渲染规则列表
+        renderTestRules();
+        showAlert('可视化编辑页面已加载，规则列表已刷新', 'success');
+      } else if (tabName === 'tab2') {
+        showAlert('JSON编辑页面已加载', 'info');
+      } else if (tabName === 'tab3') {
+        showAlert('帮助说明页面已加载', 'info');
+      }
+    }
+    
+    // 渲染测试规则列表
+    function renderTestRules() {
+      const container = document.getElementById('rulesList');
+      const statusContainer = document.getElementById('rulesStatus');
+      
+      if (!container) return;
+      
+      console.log('正在渲染规则列表...');
+      
+      // 更新状态提示
+      if (statusContainer) {
+        statusContainer.style.display = 'block';
+        statusContainer.textContent = `刷新规则列表...（当前 ${testRules.length} 条规则）`;
+        statusContainer.className = 'alert alert-info';
+      }
+      
+      // 模拟加载延迟
+      setTimeout(() => {
+        container.innerHTML = testRules.map((rule, index) => {
+          return `
+            <div class="rule-item">
+              <strong>${rule.name}:</strong><br>
+              从: ${rule.from}<br>
+              到: ${rule.to}<br>
+              <small>渲染时间: ${new Date().toLocaleTimeString()}</small>
+            </div>
+          `;
+        }).join('');
+        
+        // 更新状态提示为成功
+        if (statusContainer) {
+          statusContainer.style.display = 'block';
+          statusContainer.textContent = `✅ 规则列表已更新！当前共有 ${testRules.length} 条重定向规则`;
+          statusContainer.className = 'alert alert-success';
+          
+          // 3秒后隐藏状态提示
+          setTimeout(() => {
+            statusContainer.style.display = 'none';
+          }, 3000);
+        }
+        
+        console.log('规则列表渲染完成');
+      }, 500);
+    }
+    
+    // 页面加载完成时设置事件监听器
+    document.addEventListener('DOMContentLoaded', function() {
+      // 设置标签页切换事件
+      document.getElementById('tab1Btn').addEventListener('click', () => switchTab('tab1'));
+      document.getElementById('tab2Btn').addEventListener('click', () => switchTab('tab2'));
+      document.getElementById('tab3Btn').addEventListener('click', () => switchTab('tab3'));
+      
+      // 设置刷新按钮事件
+      document.getElementById('refreshRulesBtn').addEventListener('click', () => {
+        renderTestRules();
+        showAlert('手动刷新规则列表', 'info');
+      });
+      
+      // 初始渲染
+      renderTestRules();
+      showAlert('测试页面加载完成！可以开始测试标签页切换功能', 'success');
+    });
+  </script>
+</body>
+</html>

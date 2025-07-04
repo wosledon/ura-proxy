@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URA Proxy 诊断工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2196F3;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            background: #fafafa;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-ok { background: #4CAF50; color: white; }
+        .status-error { background: #f44336; color: white; }
+        .status-warning { background: #ff9800; color: white; }
+        .button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover { background: #1976D2; }
+        .log-area {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .fix-button {
+            background: #4CAF50;
+            margin-left: 10px;
+        }
+        .fix-button:hover { background: #45a049; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 URA Proxy 诊断工具</h1>
+        
+        <div class="section">
+            <h3>📋 系统状态检查</h3>
+            <div id="systemStatus">正在检查...</div>
+            <button class="button" onclick="checkSystem()">🔄 重新检查</button>
+        </div>
+        
+        <div class="section">
+            <h3>⚙️ 扩展配置</h3>
+            <div id="configStatus">正在检查...</div>
+            <button class="button" onclick="checkConfig()">🔄 检查配置</button>
+            <button class="button fix-button" onclick="fixConfig()">🔧 修复配置</button>
+        </div>
+        
+        <div class="section">
+            <h3>🎯 拦截器状态</h3>
+            <div id="interceptorStatus">正在检查...</div>
+            <button class="button" onclick="checkInterceptor()">🔄 检查拦截器</button>
+            <button class="button fix-button" onclick="injectInterceptor()">💉 重新注入</button>
+        </div>
+        
+        <div class="section">
+            <h3>📊 请求日志</h3>
+            <div id="logsStatus">正在检查...</div>
+            <button class="button" onclick="checkLogs()">🔄 检查日志</button>
+            <button class="button" onclick="sendTestRequest()">🧪 发送测试请求</button>
+            <button class="button" onclick="openPanel()">📋 打开面板</button>
+        </div>
+        
+        <div class="section">
+            <h3>🛠️ 快速修复</h3>
+            <p>如果上述检查发现问题，点击下面的按钮进行一键修复：</p>
+            <button class="button fix-button" onclick="quickFix()">🚀 一键修复</button>
+            <button class="button" onclick="resetAll()">🔄 重置所有配置</button>
+        </div>
+        
+        <div class="section">
+            <h3>📝 诊断日志</h3>
+            <div id="diagnosticLog" class="log-area">等待诊断...</div>
+            <button class="button" onclick="clearLog()">🗑️ 清空日志</button>
+            <button class="button" onclick="copyLog()">📋 复制日志</button>
+        </div>
+    </div>
+
+    <script>
+        let diagnosticMessages = [];
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `[${timestamp}] ${message}`;
+            diagnosticMessages.push(logMessage);
+            
+            const logArea = document.getElementById('diagnosticLog');
+            logArea.innerHTML = diagnosticMessages.join('\n');
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+        
+        function updateStatus(elementId, message, status = 'ok') {
+            const element = document.getElementById(elementId);
+            const statusClass = `status-${status}`;
+            element.innerHTML = `<span class="${statusClass}">${status.toUpperCase()}</span> ${message}`;
+        }
+        
+        async function checkSystem() {
+            log('🔍 开始系统检查...');
+            
+            // 检查 Chrome 扩展 API
+            const hasExtensionAPI = !!(chrome && chrome.runtime);
+            const hasStorageAPI = !!(chrome && chrome.storage);
+            const hasScriptingAPI = !!(chrome && chrome.scripting);
+            const hasTabsAPI = !!(chrome && chrome.tabs);
+            
+            if (hasExtensionAPI && hasStorageAPI && hasScriptingAPI && hasTabsAPI) {
+                updateStatus('systemStatus', '所有必需的 Chrome API 可用', 'ok');
+                log('✅ Chrome API 检查通过');
+            } else {
+                updateStatus('systemStatus', '缺少必需的 Chrome API', 'error');
+                log('❌ Chrome API 检查失败');
+                return;
+            }
+            
+            // 检查扩展 ID
+            try {
+                const extensionId = chrome.runtime.id;
+                log(`✅ 扩展 ID: ${extensionId}`);
+            } catch (error) {
+                log(`❌ 无法获取扩展 ID: ${error.message}`);
+            }
+        }
+        
+        async function checkConfig() {
+            log('🔍 检查扩展配置...');
+            
+            try {
+                // 检查本地存储配置
+                const stored = localStorage.getItem('ura-proxy-intercept-config');
+                if (stored) {
+                    const config = JSON.parse(stored);
+                    if (config.enabled) {
+                        updateStatus('configStatus', `拦截已启用 - 域名过滤: ${config.domainFilter || '无'} - 路径过滤: ${config.pathFilter || '无'}`, 'ok');
+                        log('✅ 本地配置正常');
+                    } else {
+                        updateStatus('configStatus', '拦截未启用', 'warning');
+                        log('⚠️ 拦截功能未启用');
+                    }
+                } else {
+                    updateStatus('configStatus', '配置不存在', 'error');
+                    log('❌ 未找到配置');
+                }
+                
+                // 检查 Chrome 存储
+                chrome.storage.local.get(['ura-proxy-intercept-config', 'ura-proxy-request-logs'], (result) => {
+                    if (result['ura-proxy-intercept-config']) {
+                        log('✅ Chrome 存储中找到配置');
+                    } else {
+                        log('⚠️ Chrome 存储中未找到配置');
+                    }
+                    
+                    if (result['ura-proxy-request-logs']) {
+                        log(`✅ Chrome 存储中找到 ${result['ura-proxy-request-logs'].length} 条日志`);
+                    } else {
+                        log('⚠️ Chrome 存储中未找到日志');
+                    }
+                });
+                
+            } catch (error) {
+                updateStatus('configStatus', `检查配置失败: ${error.message}`, 'error');
+                log(`❌ 配置检查失败: ${error.message}`);
+            }
+        }
+        
+        async function checkInterceptor() {
+            log('🔍 检查拦截器状态...');
+            
+            try {
+                const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
+                if (!tab) {
+                    updateStatus('interceptorStatus', '无法获取当前标签页', 'error');
+                    return;
+                }
+                
+                // 检查页面是否可以注入脚本
+                if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) {
+                    updateStatus('interceptorStatus', '当前页面不支持脚本注入', 'warning');
+                    log('⚠️ 当前页面是系统页面，无法注入脚本');
+                    return;
+                }
+                
+                // 尝试检查拦截器状态
+                chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    func: () => {
+                        return {
+                            hasInterceptor: !!window.uraProxyInterceptorInjected,
+                            hasDebug: !!window.uraProxyDebug,
+                            url: location.href
+                        };
+                    }
+                }, (results) => {
+                    if (results && results[0] && results[0].result) {
+                        const result = results[0].result;
+                        if (result.hasInterceptor) {
+                            updateStatus('interceptorStatus', `拦截器已注入到: ${result.url}`, 'ok');
+                            log('✅ 拦截器已正确注入');
+                        } else {
+                            updateStatus('interceptorStatus', `拦截器未注入到: ${result.url}`, 'warning');
+                            log('⚠️ 拦截器未注入');
+                        }
+                    } else {
+                        updateStatus('interceptorStatus', '无法检查拦截器状态', 'error');
+                        log('❌ 拦截器状态检查失败');
+                    }
+                });
+                
+            } catch (error) {
+                updateStatus('interceptorStatus', `检查失败: ${error.message}`, 'error');
+                log(`❌ 拦截器检查失败: ${error.message}`);
+            }
+        }
+        
+        async function checkLogs() {
+            log('🔍 检查请求日志...');
+            
+            try {
+                // 检查后台脚本日志
+                chrome.runtime.sendMessage({ type: 'GET_REQUEST_LOGS' }, (response) => {
+                    if (response && response.logs) {
+                        updateStatus('logsStatus', `后台脚本中有 ${response.logs.length} 条日志`, 'ok');
+                        log(`✅ 后台脚本日志: ${response.logs.length} 条`);
+                    } else {
+                        updateStatus('logsStatus', '后台脚本中无日志', 'warning');
+                        log('⚠️ 后台脚本中无日志');
+                    }
+                });
+                
+                // 检查本地存储日志
+                chrome.storage.local.get(['ura-proxy-request-logs'], (result) => {
+                    if (result['ura-proxy-request-logs']) {
+                        log(`✅ 本地存储日志: ${result['ura-proxy-request-logs'].length} 条`);
+                    } else {
+                        log('⚠️ 本地存储中无日志');
+                    }
+                });
+                
+            } catch (error) {
+                updateStatus('logsStatus', `检查失败: ${error.message}`, 'error');
+                log(`❌ 日志检查失败: ${error.message}`);
+            }
+        }
+        
+        async function fixConfig() {
+            log('🔧 开始修复配置...');
+            
+            try {
+                const config = {
+                    enabled: true,
+                    domainFilter: '',
+                    pathFilter: '',
+                    maxRecords: 100
+                };
+                
+                // 保存到本地存储
+                localStorage.setItem('ura-proxy-intercept-config', JSON.stringify(config));
+                
+                // 保存到 Chrome 存储
+                chrome.storage.local.set({ 'ura-proxy-intercept-config': JSON.stringify(config) });
+                
+                // 通知后台脚本
+                chrome.runtime.sendMessage({
+                    type: 'REQUEST_INTERCEPT_CONFIG_CHANGED',
+                    config: config
+                });
+                
+                updateStatus('configStatus', '配置已修复并启用', 'ok');
+                log('✅ 配置修复完成');
+                
+            } catch (error) {
+                log(`❌ 配置修复失败: ${error.message}`);
+            }
+        }
+        
+        async function injectInterceptor() {
+            log('💉 重新注入拦截器...');
+            
+            try {
+                const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
+                if (!tab) {
+                    log('❌ 无法获取当前标签页');
+                    return;
+                }
+                
+                if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) {
+                    log('⚠️ 当前页面不支持脚本注入');
+                    return;
+                }
+                
+                await chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    files: [],
+                    world: 'MAIN'
+                });
+                
+                log('✅ 拦截器注入完成');
+                
+                // 等待一秒后检查状态
+                setTimeout(checkInterceptor, 1000);
+                
+            } catch (error) {
+                log(`❌ 拦截器注入失败: ${error.message}`);
+            }
+        }
+        
+        async function sendTestRequest() {
+            log('🧪 发送测试请求...');
+            
+            try {
+                const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
+                if (!tab) {
+                    log('❌ 无法获取当前标签页');
+                    return;
+                }
+                
+                chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    func: () => {
+                        fetch('https://httpbin.org/json')
+                            .then(() => console.log('🧪 测试请求完成'))
+                            .catch(() => console.log('🧪 测试请求失败'));
+                    }
+                });
+                
+                log('✅ 测试请求已发送');
+                
+            } catch (error) {
+                log(`❌ 发送测试请求失败: ${error.message}`);
+            }
+        }
+        
+        async function openPanel() {
+            log('📋 打开请求面板...');
+            
+            try {
+                const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
+                if (!tab) {
+                    log('❌ 无法获取当前标签页');
+                    return;
+                }
+                
+                await chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    files: ['request-panel.js']
+                });
+                
+                log('✅ 请求面板已打开');
+                
+            } catch (error) {
+                log(`❌ 打开面板失败: ${error.message}`);
+            }
+        }
+        
+        async function quickFix() {
+            log('🚀 开始一键修复...');
+            
+            await fixConfig();
+            await injectInterceptor();
+            
+            setTimeout(() => {
+                checkSystem();
+                checkConfig();
+                checkInterceptor();
+                checkLogs();
+            }, 2000);
+            
+            log('✅ 一键修复完成');
+        }
+        
+        async function resetAll() {
+            log('🔄 重置所有配置...');
+            
+            try {
+                // 清空本地存储
+                localStorage.removeItem('ura-proxy-intercept-config');
+                localStorage.removeItem('ura-proxy-request-logs');
+                localStorage.removeItem('ura-proxy-request-logs-backup');
+                
+                // 清空 Chrome 存储
+                chrome.storage.local.clear();
+                
+                log('✅ 所有配置已重置');
+                
+                // 重新初始化
+                setTimeout(quickFix, 1000);
+                
+            } catch (error) {
+                log(`❌ 重置失败: ${error.message}`);
+            }
+        }
+        
+        function clearLog() {
+            diagnosticMessages = [];
+            document.getElementById('diagnosticLog').innerHTML = '日志已清空';
+        }
+        
+        function copyLog() {
+            const logText = diagnosticMessages.join('\n');
+            navigator.clipboard.writeText(logText).then(() => {
+                log('✅ 日志已复制到剪贴板');
+            }).catch(() => {
+                log('❌ 复制失败');
+            });
+        }
+        
+        // 页面加载时自动检查
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🔧 URA Proxy 诊断工具已启动');
+            setTimeout(() => {
+                checkSystem();
+                checkConfig();
+                checkInterceptor();
+                checkLogs();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

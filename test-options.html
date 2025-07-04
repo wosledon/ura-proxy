@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>API重定向配置管理 - 测试</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+      background: #f5f5f5;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+      color: #2196F3;
+      border-bottom: 2px solid #2196F3;
+      padding-bottom: 10px;
+      margin-bottom: 30px;
+    }
+    
+    .alert {
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 4px;
+      border: 1px solid transparent;
+    }
+    
+    .alert-success {
+      color: #155724;
+      background-color: #d4edda;
+      border-color: #c3e6cb;
+    }
+    
+    .alert-danger {
+      color: #721c24;
+      background-color: #f8d7da;
+      border-color: #f5c6cb;
+    }
+    
+    .alert-info {
+      color: #0c5460;
+      background-color: #d1ecf1;
+      border-color: #bee5eb;
+    }
+    
+    button {
+      background: #2196F3;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    
+    button:hover {
+      background: #1976D2;
+    }
+    
+    .btn-success {
+      background: #4CAF50;
+    }
+    
+    .btn-success:hover {
+      background: #45a049;
+    }
+    
+    .btn-danger {
+      background: #f44336;
+    }
+    
+    .btn-danger:hover {
+      background: #da190b;
+    }
+    
+    input {
+      width: 200px;
+      padding: 8px;
+      margin: 5px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔧 配置功能测试</h1>
+    
+    <div id="alertContainer"></div>
+    
+    <h2>测试功能</h2>
+    <button id="testAlertBtn">测试提示</button>
+    <button id="testLocalStorageBtn">测试本地存储</button>
+    <button id="testLoadRulesBtn">测试加载规则</button>
+    
+    <h2>快速添加规则测试</h2>
+    <input type="text" id="quickDomain" placeholder="api.example.com" value="test.api.com">
+    <input type="text" id="quickPath" placeholder="/api/v1" value="/test">
+    <input type="number" id="quickPort" placeholder="3000" value="8080">
+    <button id="addQuickRuleBtn" class="btn-success">添加规则</button>
+    
+    <h2>当前规则</h2>
+    <div id="rulesList"></div>
+    
+    <button id="clearAllRulesBtn" class="btn-danger">清空规则</button>
+  </div>
+  
+  <script>
+    // 简化版的测试脚本
+    let currentRules = [];
+
+    // 测试函数
+    function testAlert() {
+      showAlert('这是一个测试提示！', 'success');
+    }
+
+    function testLocalStorage() {
+      try {
+        localStorage.setItem('test-key', 'test-value');
+        const value = localStorage.getItem('test-key');
+        showAlert('本地存储测试成功: ' + value, 'success');
+        localStorage.removeItem('test-key');
+      } catch (error) {
+        showAlert('本地存储测试失败: ' + error.message, 'danger');
+      }
+    }
+
+    function testLoadRules() {
+      loadRulesFromStorage();
+      showAlert('规则加载完成，当前有 ' + currentRules.length + ' 条规则', 'info');
+      renderRulesList();
+    }
+
+    // 从options.js复制的核心函数
+    function showAlert(message, type = 'info') {
+      const alertContainer = document.getElementById('alertContainer');
+      if (!alertContainer) {
+        console.error('Alert container not found!');
+        console.log(message);
+        return;
+      }
+      
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type}`;
+      alertDiv.innerHTML = message;
+      
+      alertContainer.appendChild(alertDiv);
+      
+      setTimeout(() => {
+        if (alertDiv.parentNode) {
+          alertDiv.parentNode.removeChild(alertDiv);
+        }
+      }, 3000);
+    }
+
+    function getDefaultRules() {
+      return [
+        {
+          "id": 1,
+          "priority": 1,
+          "action": {
+            "type": "redirect",
+            "redirect": {
+              "regexSubstitution": "http://localhost:8091\\1"
+            }
+          },
+          "condition": {
+            "regexFilter": "^https://centerapi\\.test\\.shijizhongyun\\.com/financeApi(.*)",
+            "resourceTypes": ["xmlhttprequest"]
+          }
+        }
+      ];
+    }
+
+    function loadRulesFromStorage() {
+      try {
+        const storedRules = localStorage.getItem('ura-proxy-rules');
+        if (storedRules) {
+          currentRules = JSON.parse(storedRules);
+        } else {
+          currentRules = getDefaultRules();
+          saveRulesToStorage();
+        }
+      } catch (error) {
+        console.error('加载规则失败:', error);
+        showAlert('加载规则失败: ' + error.message, 'danger');
+        currentRules = getDefaultRules();
+      }
+    }
+
+    function saveRulesToStorage() {
+      try {
+        localStorage.setItem('ura-proxy-rules', JSON.stringify(currentRules, null, 2));
+        showAlert('规则已保存到本地存储！', 'success');
+      } catch (error) {
+        console.error('保存规则失败:', error);
+        showAlert('保存规则失败: ' + error.message, 'danger');
+      }
+    }
+
+    function renderRulesList() {
+      const container = document.getElementById('rulesList');
+      if (currentRules.length === 0) {
+        container.innerHTML = '<div class="alert alert-info">暂无重定向规则。</div>';
+        return;
+      }
+      
+      container.innerHTML = currentRules.map((rule, index) => {
+        return `
+          <div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0; border-radius: 4px;">
+            <strong>规则 ${rule.id}:</strong><br>
+            正则: ${rule.condition.regexFilter}<br>
+            目标: ${rule.action.redirect.regexSubstitution}<br>
+            <button class="btn-danger delete-rule-btn" data-index="${index}">删除</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addQuickRule() {
+      try {
+        const domain = document.getElementById('quickDomain').value.trim();
+        const path = document.getElementById('quickPath').value.trim();
+        const port = document.getElementById('quickPort').value.trim();
+        
+        if (!domain || !port) {
+          showAlert('请填写域名和端口号', 'danger');
+          return;
+        }
+        
+        const newId = Math.max(...currentRules.map(r => r.id), 0) + 1;
+        const escapedDomain = domain.replace(/\./g, '\\\\.');
+        const pathPart = path ? path.replace(/\//g, '\\/') : '';
+        const regexFilter = `^https://${escapedDomain}${pathPart}(.*)`;
+        const regexSubstitution = `http://localhost:${port}\\1`;
+        
+        const newRule = {
+          "id": newId,
+          "priority": 1,
+          "action": {
+            "type": "redirect",
+            "redirect": {
+              "regexSubstitution": regexSubstitution
+            }
+          },
+          "condition": {
+            "regexFilter": regexFilter,
+            "resourceTypes": ["xmlhttprequest"]
+          }
+        };
+        
+        currentRules.push(newRule);
+        renderRulesList();
+        saveRulesToStorage();
+        
+        showAlert(`新规则已添加：${domain}${path} → localhost:${port}`, 'success');
+      } catch (error) {
+        showAlert('添加规则失败: ' + error.message, 'danger');
+        console.error('Add rule error:', error);
+      }
+    }
+
+    function deleteRule(index) {
+      if (confirm('确定要删除这个规则吗？')) {
+        currentRules.splice(index, 1);
+        renderRulesList();
+        saveRulesToStorage();
+        showAlert('规则已删除', 'success');
+      }
+    }
+
+    function clearAllRules() {
+      if (confirm('确定要清空所有规则吗？')) {
+        currentRules = [];
+        renderRulesList();
+        saveRulesToStorage();
+        showAlert('所有规则已清空', 'success');
+      }
+    }
+
+    // 页面加载时初始化
+    document.addEventListener('DOMContentLoaded', function() {
+      try {
+        loadRulesFromStorage();
+        renderRulesList();
+        setupEventListeners();
+        showAlert('测试页面加载完成！', 'success');
+      } catch (error) {
+        showAlert('页面初始化失败: ' + error.message, 'danger');
+        console.error('Page initialization error:', error);
+      }
+    });
+
+    // 设置事件监听器
+    function setupEventListeners() {
+      // 测试按钮
+      document.getElementById('testAlertBtn').addEventListener('click', testAlert);
+      document.getElementById('testLocalStorageBtn').addEventListener('click', testLocalStorage);
+      document.getElementById('testLoadRulesBtn').addEventListener('click', testLoadRules);
+      
+      // 添加规则按钮
+      document.getElementById('addQuickRuleBtn').addEventListener('click', addQuickRule);
+      
+      // 清空规则按钮
+      document.getElementById('clearAllRulesBtn').addEventListener('click', clearAllRules);
+      
+      // 删除规则按钮事件委托
+      document.getElementById('rulesList').addEventListener('click', function(event) {
+        if (event.target.classList.contains('delete-rule-btn')) {
+          const index = parseInt(event.target.dataset.index);
+          deleteRule(index);
+        }
+      });
+    }
+  </script>
+</body>
+</html>

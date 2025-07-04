@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URA Proxy 右侧面板测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .api-button {
+            background: #2196F3;
+        }
+        .api-button:hover {
+            background: #1976D2;
+        }
+        .logs {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .instructions {
+            background: rgba(255, 193, 7, 0.2);
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎛️ URA Proxy 右侧面板测试</h1>
+        
+        <div class="instructions">
+            <h3>📋 使用说明</h3>
+            <ol>
+                <li>点击 Chrome 扩展图标或右键菜单打开 URA Proxy</li>
+                <li>在 popup 窗口中点击"🎛️ 开启请求面板"</li>
+                <li>或在配置页面的"请求解析"标签页中点击"🎛️ 开启右侧请求面板"</li>
+                <li>右侧将出现实时请求日志面板，页面内容会自动向左推移</li>
+                <li>点击下方按钮发送测试请求，观察右侧面板的实时日志</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h3>🚀 API 请求测试</h3>
+            <p>点击下方按钮发送不同类型的 HTTP 请求，观察右侧面板的实时日志</p>
+            
+            <button class="api-button" onclick="sendGetRequest()">📥 GET 请求</button>
+            <button class="api-button" onclick="sendPostRequest()">📤 POST 请求</button>
+            <button class="api-button" onclick="sendJsonRequest()">📄 JSON 请求</button>
+            <button class="api-button" onclick="sendErrorRequest()">❌ 错误请求</button>
+            <button onclick="sendMultipleRequests()">🔄 批量请求</button>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 请求日志</h3>
+            <div id="logs" class="logs">等待发送请求...</div>
+            <button onclick="clearLogs()">🗑️ 清空日志</button>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 拦截器调试</h3>
+            <p>测试请求拦截功能是否正常工作</p>
+            <button onclick="testInterceptor()">🧪 测试拦截器</button>
+            <button onclick="checkInterceptorStatus()">📊 检查状态</button>
+            <button onclick="openRequestPanel()">📋 打开请求面板</button>
+            <div id="debug-info" style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 5px; font-family: monospace; font-size: 12px; display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const logsDiv = document.getElementById('logs');
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logsDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+
+        async function sendGetRequest() {
+            log('发送 GET 请求...');
+            try {
+                const response = await fetch('https://httpbin.org/get?test=ura-proxy&timestamp=' + Date.now());
+                const data = await response.json();
+                log(`✅ GET 请求成功 - 状态: ${response.status}`);
+            } catch (error) {
+                log(`❌ GET 请求失败: ${error.message}`);
+            }
+        }
+
+        async function sendPostRequest() {
+            log('发送 POST 请求...');
+            try {
+                const response = await fetch('https://httpbin.org/post', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'test=ura-proxy&action=post&timestamp=' + Date.now()
+                });
+                const data = await response.json();
+                log(`✅ POST 请求成功 - 状态: ${response.status}`);
+            } catch (error) {
+                log(`❌ POST 请求失败: ${error.message}`);
+            }
+        }
+
+        async function sendJsonRequest() {
+            log('发送 JSON 请求...');
+            try {
+                const response = await fetch('https://httpbin.org/post', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        test: 'ura-proxy',
+                        action: 'json',
+                        timestamp: Date.now(),
+                        data: {
+                            message: '这是一个测试 JSON 负载',
+                            nested: {
+                                value: 'nested data'
+                            }
+                        }
+                    })
+                });
+                const data = await response.json();
+                log(`✅ JSON 请求成功 - 状态: ${response.status}`);
+            } catch (error) {
+                log(`❌ JSON 请求失败: ${error.message}`);
+            }
+        }
+
+        async function sendErrorRequest() {
+            log('发送错误请求...');
+            try {
+                const response = await fetch('https://httpbin.org/status/404');
+                log(`⚠️ 错误请求 - 状态: ${response.status}`);
+            } catch (error) {
+                log(`❌ 错误请求失败: ${error.message}`);
+            }
+        }
+
+        async function sendMultipleRequests() {
+            log('发送批量请求...');
+            const requests = [
+                fetch('https://httpbin.org/delay/1'),
+                fetch('https://httpbin.org/json'),
+                fetch('https://httpbin.org/uuid'),
+                fetch('https://httpbin.org/base64/SFRUUEJJTiBpcyBhd2Vzb21l')
+            ];
+            
+            try {
+                const responses = await Promise.all(requests);
+                log(`✅ 批量请求完成 - ${responses.length} 个请求`);
+                responses.forEach((response, index) => {
+                    log(`  请求 ${index + 1}: ${response.status} ${response.statusText}`);
+                });
+            } catch (error) {
+                log(`❌ 批量请求失败: ${error.message}`);
+            }
+        }
+
+        function clearLogs() {
+            logsDiv.innerHTML = '日志已清空...\n';
+        }
+
+        // 页面加载完成提示
+        window.addEventListener('load', () => {
+            log('🎉 测试页面加载完成，请开启右侧请求面板');
+        });
+
+        // 拦截器调试功能
+        function testInterceptor() {
+            const debugDiv = document.getElementById('debug-info');
+            debugDiv.style.display = 'block';
+            debugDiv.innerHTML = '正在测试拦截器...\n';
+            
+            log('🧪 开始测试拦截器...');
+            
+            // 检查拦截器是否注入
+            if (window.uraProxyDebug) {
+                const status = window.uraProxyDebug.getInterceptorStatus();
+                debugDiv.innerHTML += `拦截器状态: ${JSON.stringify(status, null, 2)}\n`;
+                
+                // 发送测试请求
+                window.uraProxyDebug.sendTestRequest();
+                log('✅ 拦截器测试完成，请检查右侧面板是否有日志');
+            } else {
+                debugDiv.innerHTML += '❌ 拦截器未注入或未初始化\n';
+                log('❌ 拦截器未找到，请检查扩展是否正确安装');
+            }
+        }
+        
+        function checkInterceptorStatus() {
+            const debugDiv = document.getElementById('debug-info');
+            debugDiv.style.display = 'block';
+            
+            if (window.uraProxyDebug) {
+                const status = window.uraProxyDebug.getInterceptorStatus();
+                debugDiv.innerHTML = `拦截器状态:\n${JSON.stringify(status, null, 2)}`;
+                log('📊 拦截器状态已更新');
+            } else {
+                debugDiv.innerHTML = '❌ 拦截器未找到';
+                log('❌ 无法获取拦截器状态');
+            }
+        }
+        
+        function openRequestPanel() {
+            // 尝试通过扩展API打开请求面板
+            if (chrome && chrome.runtime) {
+                chrome.runtime.sendMessage({
+                    type: 'OPEN_REQUEST_PANEL'
+                }).then(() => {
+                    log('✅ 请求面板打开命令已发送');
+                }).catch(() => {
+                    log('❌ 无法发送打开面板命令，请手动打开');
+                });
+            } else {
+                log('❌ 无法访问扩展API，请手动从扩展popup打开面板');
+            }
+        }
+    </script>
+</body>
+</html>

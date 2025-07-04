@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>API重定向配置管理</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+      background: #f5f5f5;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+      color: #2196F3;
+      border-bottom: 2px solid #2196F3;
+      padding-bottom: 10px;
+      margin-bottom: 30px;
+    }
+    
+    h2 {
+      color: #388e3c;
+      margin-top: 30px;
+      margin-bottom: 15px;
+    }
+    
+    .rule-editor {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #333;
+    }
+    
+    input, textarea, select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      font-family: monospace;
+      box-sizing: border-box;
+    }
+    
+    textarea {
+      min-height: 200px;
+      font-family: 'Courier New', monospace;
+      white-space: pre;
+      overflow-wrap: normal;
+      overflow-x: auto;
+    }
+    
+    button {
+      background: #2196F3;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    
+    button:hover {
+      background: #1976D2;
+    }
+    
+    .btn-success {
+      background: #4CAF50;
+    }
+    
+    .btn-success:hover {
+      background: #45a049;
+    }
+    
+    .btn-danger {
+      background: #f44336;
+    }
+    
+    .btn-danger:hover {
+      background: #da190b;
+    }
+    
+    .btn-warning {
+      background: #ff9800;
+    }
+    
+    .btn-warning:hover {
+      background: #e68900;
+    }
+    
+    .btn-primary {
+      background: #2196F3;
+    }
+    
+    .btn-primary:hover {
+      background: #1976D2;
+    }
+    
+    .rule-item {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 15px;
+      margin: 10px 0;
+      position: relative;
+      transition: opacity 0.3s;
+    }
+    
+    .rule-item.rule-disabled {
+      opacity: 0.6;
+      background: #f8f8f8;
+    }
+    
+    .rule-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      position: relative;
+      min-height: 32px;
+    }
+    .rule-title {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .rule-actions {
+      display: flex;
+      gap: 8px;
+      margin-left: 10px;
+      z-index: 1;
+      align-items: center;
+    }
+    .rule-actions button {
+      padding: 4px 10px;
+      font-size: 12px;
+      border-radius: 3px;
+      margin-bottom: 0;
+      margin-right: 0;
+      min-width: 40px;
+      display: flex;
+      align-items: center;
+      height: 32px;
+    }
+    .rule-toggle {
+      position: static;
+      width: auto;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      margin-left: 0;
+    }
+    .rule-toggle .toggle-switch {
+      width: 34px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+    .rule-toggle .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .rule-toggle .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 20px;
+    }
+    .rule-toggle .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    .rule-toggle input:checked + .toggle-slider {
+      background-color: #4CAF50;
+    }
+    .rule-toggle input:checked + .toggle-slider:before {
+      transform: translateX(14px);
+    }
+    
+    .rule-details {
+      font-family: monospace;
+      font-size: 13px;
+      color: #666;
+    }
+    
+    .alert {
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 4px;
+      border: 1px solid transparent;
+    }
+    
+    .alert-success {
+      color: #155724;
+      background-color: #d4edda;
+      border-color: #c3e6cb;
+    }
+    
+    .alert-danger {
+      color: #721c24;
+      background-color: #f8d7da;
+      border-color: #f5c6cb;
+    }
+    
+    .alert-info {
+      color: #0c5460;
+      background-color: #d1ecf1;
+      border-color: #bee5eb;
+    }
+    
+    .alert-warning {
+      color: #856404;
+      background-color: #fff3cd;
+      border-color: #ffeaa7;
+    }
+    
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .tab {
+      padding: 12px 20px;
+      background: #f8f9fa;
+      border: 1px solid #ddd;
+      border-bottom: none;
+      cursor: pointer;
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
+      margin-right: 2px;
+      white-space: nowrap;
+      font-size: 14px;
+    }
+    
+    .tab.active {
+      background: white;
+      color: #2196F3;
+      font-weight: bold;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .quick-add {
+      background: #e3f2fd;
+      border: 1px solid #2196F3;
+      border-radius: 6px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    
+    .quick-add h3 {
+      margin-top: 0;
+      color: #1976D2;
+    }
+    
+    .form-row {
+      display: flex;
+      gap: 15px;
+      align-items: end;
+    }
+    
+    .form-col {
+      flex: 1;
+    }
+    
+    .form-col-auto {
+      flex: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔧 API重定向配置管理</h1>
+    
+    <div id="alertContainer"></div>
+    
+    <!-- 扩展状态显示 -->
+    <div class="alert alert-info">
+      <strong>🔄 扩展状态：</strong>
+      <span id="extensionStatus">检查中...</span>
+      <button id="refreshStatusBtn" style="margin-left: 10px; padding: 4px 8px; font-size: 12px;">刷新状态</button>
+    </div>
+
+    <!-- protobuf转换配置 -->
+    <div class="alert alert-warning">
+      <strong>🔧 协议转换配置：</strong>
+      <label style="display: inline; margin-left: 15px; margin-right: 10px;">
+        <input type="checkbox" id="enableProtoConversion" style="width: auto; margin-right: 5px;">
+        启用 Protobuf → JSON 转换
+      </label>
+      <button id="refreshProtoStatusBtn" style="margin-left: 10px; padding: 4px 8px; font-size: 12px;">刷新转换状态</button>
+      <div id="protoConversionStatus" style="margin-top: 8px; font-size: 13px; color: #666;">
+        正在检查转换状态...
+      </div>
+    </div>
+    
+    <div class="tabs">
+      <div class="tab active" id="visualTabBtn">📋 可视化编辑</div>
+      <div class="tab" id="apiMappingTabBtn">🔄 接口映射</div>
+      <div class="tab" id="requestInterceptTabBtn">🔍 请求解析</div>
+      <div class="tab" id="jsonTabBtn">💻 JSON编辑</div>
+      <div class="tab" id="helpTabBtn">❓ 帮助说明</div>
+    </div>
+    
+    <!-- 可视化编辑标签页 -->
+    <div id="visualTab" class="tab-content active">
+      
+      <!-- 快速添加规则 -->
+      <div class="quick-add">
+        <h3>➕ 快速添加重定向规则</h3>
+        <div class="form-row">
+          <div class="form-col">
+            <label>源域名 (例: api.example.com)</label>
+            <input type="text" id="quickDomain" placeholder="api.example.com">
+          </div>
+          <div class="form-col">
+            <label>源路径 (例: /api/v1 或留空)</label>
+            <input type="text" id="quickPath" placeholder="/api/v1">
+          </div>
+          <div class="form-col">
+            <label>本地端口</label>
+            <input type="number" id="quickPort" placeholder="3000" value="3000">
+          </div>
+          <div class="form-col-auto">
+            <button id="addQuickRuleBtn" class="btn-success">添加规则</button>
+          </div>
+        </div>
+        <div class="form-row" style="margin-top: 15px;">
+          <div class="form-col">
+            <label style="display: flex; align-items: center;">
+              <input type="checkbox" id="quickRuleProtoConversion" style="width: auto; margin-right: 8px;">
+              此规则启用 Protobuf → JSON 转换
+            </label>
+            <small style="color: #666; font-size: 12px;">
+              勾选此项将在规则中标记需要协议转换（前端protobuf → 本地JSON）
+            </small>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 现有规则列表 -->
+      <h2>📋 现有规则列表</h2>
+      <div id="rulesStatus" class="alert alert-info" style="display: none;">
+        正在加载规则列表...
+      </div>
+      <div id="rulesList"></div>
+      
+      <div style="margin-top: 30px;">
+        <button id="saveRulesBtn" class="btn-success">💾 保存所有规则</button>
+        <button id="exportRulesBtn" class="btn-warning">📥 导出到rules.json</button>
+        <button id="previewMergedRulesBtn" class="btn-warning">👀 预览合并规则</button>
+        <button id="loadDefaultRulesBtn" class="btn-warning">🔄 恢复默认规则</button>
+        <button id="clearAllRulesBtn" class="btn-danger">🗑️ 清空所有规则</button>
+      </div>
+    </div>
+    
+    <!-- 接口映射标签页 -->
+    <div id="apiMappingTab" class="tab-content">
+      <h2>🔄 接口路径映射</h2>
+      
+      <div class="alert alert-info">
+        <strong>💡 功能说明：</strong>
+        用于接口重构时的路径映射，例如前端调用 /api/v1/user，映射到本地的 /api/v2/user
+      </div>
+      
+      <!-- 快速添加接口映射 -->
+      <div class="quick-add">
+        <h3>➕ 快速添加接口映射</h3>
+        <div class="form-row">
+          <div class="form-col">
+            <label>源接口路径 (例: /api/v1/user)</label>
+            <input type="text" id="mappingSourcePath" placeholder="/api/v1/user">
+          </div>
+          <div class="form-col">
+            <label>目标接口路径 (例: /api/v2/user)</label>
+            <input type="text" id="mappingTargetPath" placeholder="/api/v2/user">
+          </div>
+          <div class="form-col">
+            <label>域名 (例: api.example.com)</label>
+            <input type="text" id="mappingDomain" placeholder="api.example.com">
+          </div>
+          <div class="form-col">
+            <label>本地端口</label>
+            <input type="number" id="mappingPort" placeholder="3000" value="3000">
+          </div>
+          <div class="form-col-auto">
+            <button id="addMappingBtn" class="btn-success">添加映射</button>
+          </div>
+        </div>
+        <div class="form-row" style="margin-top: 15px;">
+          <div class="form-col">
+            <label style="display: flex; align-items: center;">
+              <input type="checkbox" id="mappingProtoConversion" style="width: auto; margin-right: 8px;">
+              此映射启用 Protobuf → JSON 转换
+            </label>
+          </div>
+          <div class="form-col">
+            <label>请求方法 (可选)</label>
+            <select id="mappingMethod">
+              <option value="">所有方法</option>
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+              <option value="PUT">PUT</option>
+              <option value="DELETE">DELETE</option>
+              <option value="PATCH">PATCH</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 接口映射列表 -->
+      <h2>📋 接口映射列表</h2>
+      <div id="mappingStatus" class="alert alert-info" style="display: none;">
+        正在加载映射列表...
+      </div>
+      <div id="mappingsList"></div>
+      
+      <div style="margin-top: 30px;">
+        <button id="saveMappingsBtn" class="btn-success">💾 保存所有映射</button>
+        <button id="exportMappingsBtn" class="btn-warning">📥 导出映射配置</button>
+        <button id="clearAllMappingsBtn" class="btn-danger">🗑️ 清空所有映射</button>
+      </div>
+    </div>
+    
+    <!-- 请求解析标签页 -->
+    <div id="requestInterceptTab" class="tab-content">
+      <h2>🔍 HTTP 请求解析</h2>
+      
+      <div class="alert alert-info">
+        <strong>💡 功能说明：</strong>
+        拦截并解析 HTTP 请求，将 Protobuf 负载转换为可读的 JSON 格式，便于开发调试
+      </div>
+      
+      <!-- 拦截配置 -->
+      <div class="quick-add">
+        <h3>⚙️ 拦截配置</h3>
+        <div class="form-row">
+          <div class="form-col">
+            <label style="display: flex; align-items: center;">
+              <input type="checkbox" id="enableRequestIntercept" style="width: auto; margin-right: 8px;">
+              启用请求拦截和解析
+            </label>
+          </div>
+          <div class="form-col">
+            <label>拦截域名过滤 (留空表示所有域名)</label>
+            <input type="text" id="interceptDomainFilter" placeholder="例: api.example.com">
+          </div>
+        </div>
+        <div class="form-row" style="margin-top: 15px;">
+          <div class="form-col">
+            <label>拦截路径过滤 (支持通配符 *)</label>
+            <input type="text" id="interceptPathFilter" placeholder="例: /api/*, /proto/*">
+          </div>
+          <div class="form-col">
+            <label>最大记录数量</label>
+            <input type="number" id="maxRecordCount" placeholder="100" value="100" min="10" max="1000">
+          </div>
+        </div>
+        <div class="form-row" style="margin-top: 15px;">
+          <div class="form-col">
+            <button id="saveInterceptConfigBtn" class="btn-success">💾 保存配置</button>
+            <button id="clearInterceptLogsBtn" class="btn-warning">🗑️ 清空日志</button>
+            <button id="exportInterceptLogsBtn" class="btn-warning">📥 导出日志</button>
+            <button id="openRequestPanelBtn" class="btn-primary">🎛️ 开启右侧请求面板</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 实时请求日志 -->
+      <h2>📋 实时请求日志</h2>
+      <div id="interceptStatus" class="alert alert-info">
+        拦截状态：未启用
+      </div>
+      
+      <!-- 过滤和搜索 -->
+      <div class="form-row" style="margin-bottom: 15px;">
+        <div class="form-col">
+          <input type="text" id="logSearchFilter" placeholder="搜索请求 URL、方法或内容...">
+        </div>
+        <div class="form-col-auto">
+          <button id="refreshLogsBtn">🔄 刷新</button>
+          <button id="pauseLogsBtn">⏸️ 暂停</button>
+        </div>
+      </div>
+      
+      <div id="requestLogsList"></div>
+    </div>
+    
+    <!-- JSON编辑标签页 -->
+    <div id="jsonTab" class="tab-content">
+      <h2>💻 JSON格式编辑</h2>
+      <div class="form-group">
+        <label>重定向规则 JSON (高级用户)</label>
+        <textarea id="jsonEditor" placeholder="在这里编辑JSON格式的规则..."></textarea>
+      </div>
+      <div>
+        <button id="saveJsonRulesBtn" class="btn-success">💾 保存JSON规则</button>
+        <button id="formatJsonBtn" class="btn-warning">🎨 格式化JSON</button>
+        <button id="validateJsonBtn" class="btn-warning">✅ 验证JSON</button>
+        <button id="loadJsonBtn" class="btn-warning">🔄 重新加载</button>
+      </div>
+    </div>
+    
+    <!-- 帮助说明标签页 -->
+    <div id="helpTab" class="tab-content">
+      <h2>❓ 使用说明</h2>
+      
+      <div class="alert alert-info">
+        <strong>💡 温馨提示：</strong>
+        <ul>
+          <li>修改规则后会自动保存到浏览器本地存储</li>
+          <li>要使规则立即生效，请点击"导出到rules.json"按钮下载新的rules.json文件</li>
+          <li>将下载的rules.json文件替换扩展目录中的同名文件</li>
+          <li>在Chrome扩展管理页面重新加载此扩展</li>
+          <li>支持可视化编辑和JSON直接编辑两种方式</li>
+        </ul>
+      </div>
+      
+      <h3>🎯 规则配置说明</h3>
+      <p><strong>源域名：</strong>要拦截的API域名，如 <code>api.example.com</code></p>
+      <p><strong>源路径：</strong>可选，指定路径前缀，如 <code>/api/v1</code></p>
+      <p><strong>本地端口：</strong>重定向到本地服务器的端口号</p>
+      <p><strong>Protobuf转换：</strong>适用于前端使用protobuf格式与网关通信，但本地开发环境使用JSON格式的场景</p>
+      
+      <h3>🔄 接口映射功能</h3>
+      <div class="rule-editor">
+        <p><strong>适用场景：</strong></p>
+        <ul>
+          <li>接口重构：前端调用 /api/v1/user，后端已升级到 /api/v2/user</li>
+          <li>路径变更：前端调用 /old/path，需要映射到 /new/path</li>
+          <li>版本兼容：支持多个API版本之间的路径转换</li>
+        </ul>
+        <p><strong>配置示例：</strong></p>
+        <ul>
+          <li>源路径：<code>/api/v1/user</code></li>
+          <li>目标路径：<code>/api/v2/user</code></li>
+          <li>域名：<code>api.example.com</code></li>
+          <li>本地端口：<code>3000</code></li>
+        </ul>
+        <p><strong>结果：</strong>前端请求 <code>https://api.example.com/api/v1/user</code> 会被重定向到 <code>http://localhost:3000/api/v2/user</code></p>
+      </div>
+      
+      <h3>🔧 Protobuf 转换功能</h3>
+      <div class="rule-editor">
+        <p><strong>适用场景：</strong></p>
+        <ul>
+          <li>生产环境：前端 → 网关（Protobuf 格式）</li>
+          <li>开发环境：前端 → 本地服务（JSON 格式）</li>
+        </ul>
+        <p><strong>使用方法：</strong></p>
+        <ol>
+          <li>在页面顶部启用 "Protobuf → JSON 转换" 全局开关</li>
+          <li>为特定规则启用转换标记（在快速添加或编辑规则时设置）</li>
+          <li>确保本地服务器支持相应的JSON格式接口</li>
+        </ol>
+        <p><strong>注意：</strong>此功能需要配合相应的代理服务器或转换中间件使用</p>
+      </div>
+      
+      <h3>🚀 快速测试</h3>
+      <div class="rule-editor">
+        <p><strong>测试重定向规则：</strong></p>
+        <pre><code>fetch('https://example.com/api/test')
+  .then(response => {
+    console.log('✅ 重定向成功！响应来源:', response.url);
+    return response.json();
+  })
+  .then(data => console.log('📄 响应数据:', data))
+  .catch(error => console.log('❌ 请求失败:', error));</code></pre>
+  
+        <p><strong>测试接口映射：</strong></p>
+        <pre><code>// 假设配置了 /api/v1/user → /api/v2/user 的映射
+fetch('https://api.example.com/api/v1/user/123')
+  .then(response => {
+    console.log('✅ 映射成功！实际请求:', response.url);
+    // 实际会请求到: http://localhost:3000/api/v2/user/123
+    return response.json();
+  })
+  .then(data => console.log('📄 用户数据:', data))
+  .catch(error => console.log('❌ 请求失败:', error));</code></pre>
+      </div>
+      
+      <h3>� 请求解析功能</h3>
+      <div class="rule-editor">
+        <p><strong>功能说明：</strong></p>
+        <ul>
+          <li>自动拦截并记录页面发出的所有 HTTP 请求</li>
+          <li>支持 fetch API 和 XMLHttpRequest 两种请求方式</li>
+          <li>可展示请求和响应的详细信息，包括 protobuf 格式数据</li>
+          <li>提供实时日志查看，便于前端与网关交互的调试</li>
+        </ul>
+        
+        <p><strong>使用步骤：</strong></p>
+        <ol>
+          <li>切换到"🔍 请求解析"标签页</li>
+          <li>配置要拦截的 URL 模式（支持通配符 *）</li>
+          <li>启用请求拦截功能</li>
+          <li>在目标网页中触发 HTTP 请求</li>
+          <li>回到请求解析页面查看实时日志</li>
+        </ol>
+        
+        <p><strong>配置示例：</strong></p>
+        <ul>
+          <li><code>https://api.example.com/*</code> - 拦截该域名下所有请求</li>
+          <li><code>*/api/v1/*</code> - 拦截所有包含 /api/v1/ 的请求</li>
+          <li><code>https://*/user*</code> - 拦截所有以 user 开头的请求路径</li>
+        </ul>
+        
+        <p><strong>日志信息包含：</strong></p>
+        <ul>
+          <li>请求时间戳和响应耗时</li>
+          <li>HTTP 方法（GET、POST、PUT、DELETE 等）</li>
+          <li>请求 URL 和状态码</li>
+          <li>请求头和响应头信息</li>
+          <li>请求体和响应体内容（包括 protobuf 二进制数据的标识）</li>
+        </ul>
+        
+        <p><strong>高级功能：</strong></p>
+        <ul>
+          <li><strong>搜索过滤：</strong>在搜索框中输入关键词快速定位特定请求</li>
+          <li><strong>暂停记录：</strong>点击"暂停"按钮停止新请求的记录</li>
+          <li><strong>清空日志：</strong>清除当前显示的所有请求记录</li>
+          <li><strong>导出日志：</strong>将请求日志导出为 JSON 文件，便于分析和分享</li>
+        </ul>
+        
+        <p><strong>Protobuf 支持：</strong></p>
+        <ul>
+          <li>自动识别 protobuf 格式的请求和响应</li>
+          <li>显示二进制数据的基本信息（如数据长度）</li>
+          <li>对于已知的 protobuf 结构，可配合转换功能查看 JSON 格式</li>
+        </ul>
+        
+        <p><strong>典型使用场景：</strong></p>
+        <ul>
+          <li><strong>API 调试：</strong>查看前端与后端的完整交互过程</li>
+          <li><strong>性能分析：</strong>分析请求响应时间，定位性能瓶颈</li>
+          <li><strong>协议调试：</strong>验证 protobuf 数据的正确性</li>
+          <li><strong>错误排查：</strong>快速定位失败的请求和错误原因</li>
+          <li><strong>接口测试：</strong>验证新开发的接口是否正常工作</li>
+        </ul>
+      </div>
+      
+      <h3>�🔄 规则同步说明</h3>
+      <div class="rule-editor">
+        <p><strong>本地存储与规则文件同步：</strong></p>
+        <ol>
+          <li>在此页面修改的规则会保存到浏览器本地存储（localStorage）</li>
+          <li>点击"导出到rules.json"按钮下载最新的规则文件</li>
+          <li>将下载的rules.json替换扩展目录中的同名文件</li>
+          <li>在chrome://extensions页面点击扩展的"重新加载"按钮</li>
+          <li>新规则立即生效！</li>
+        </ol>
+      </div>
+      
+      <h3>⚠️ 注意事项</h3>
+      <ul>
+        <li>确保本地服务器已启动并监听相应端口</li>
+        <li>本地服务器需要配置CORS以支持跨域请求</li>
+        <li>HTTPS到HTTP的重定向可能需要在浏览器中允许混合内容</li>
+        <li>修改规则后需要重新加载扩展才能生效</li>
+      </ul>
+    </div>
+  </div>
+  
+  <script src="options.js"></script>
+</body>
+</html>

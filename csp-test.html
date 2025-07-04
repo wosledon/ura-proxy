@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>CSP测试页面</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    .alert {
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 4px;
+      border: 1px solid transparent;
+    }
+    .alert-success {
+      color: #155724;
+      background-color: #d4edda;
+      border-color: #c3e6cb;
+    }
+    .alert-danger {
+      color: #721c24;
+      background-color: #f8d7da;
+      border-color: #f5c6cb;
+    }
+    button {
+      background: #2196F3;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #1976D2;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔧 Content Security Policy 测试</h1>
+  
+  <div id="alertContainer"></div>
+  
+  <h2>测试按钮（使用addEventListener）</h2>
+  <button id="testBtn1">测试按钮1</button>
+  <button id="testBtn2">测试按钮2</button>
+  
+  <h2>状态信息</h2>
+  <div id="statusInfo">页面加载中...</div>
+  
+  <script>
+    // 显示提示消息
+    function showAlert(message, type = 'success') {
+      const container = document.getElementById('alertContainer');
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type}`;
+      alert.textContent = message;
+      
+      container.appendChild(alert);
+      
+      setTimeout(() => {
+        if (alert.parentNode) {
+          alert.parentNode.removeChild(alert);
+        }
+      }, 3000);
+    }
+    
+    // 页面加载完成时设置事件监听器
+    document.addEventListener('DOMContentLoaded', function() {
+      // 设置按钮事件监听器
+      document.getElementById('testBtn1').addEventListener('click', function() {
+        showAlert('✅ 按钮1点击成功！使用addEventListener正常工作', 'success');
+      });
+      
+      document.getElementById('testBtn2').addEventListener('click', function() {
+        showAlert('✅ 按钮2点击成功！CSP问题已解决', 'success');
+      });
+      
+      // 更新状态信息
+      document.getElementById('statusInfo').textContent = '✅ 页面加载完成，所有事件监听器已设置';
+      showAlert('🎉 CSP测试页面加载成功！现在可以正常使用addEventListener了', 'success');
+    });
+  </script>
+</body>
+</html>

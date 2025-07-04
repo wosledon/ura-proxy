@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "URA Proxy",
+  "version": "1.0.0",
+  "description": "将线上API请求重定向到本地开发服务器，支持协议转换和请求解析",
+  "permissions": [
+    "declarativeNetRequest",
+    "storage",
+    "activeTab",
+    "browsingData",
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ],
+  "declarative_net_request": {
+    "rule_resources": [{
+      "id": "ruleset_1",
+      "enabled": false,
+      "path": "rules.json"
+    }]
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "API重定向",
+    "default_icon": {
+      "16": "icons/icon-16-green.png",
+      "32": "icons/icon-32-green.png",
+      "48": "icons/icon-48-green.png",
+      "128": "icons/icon-128-green.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_page": "options.html",
+  "icons": {
+    "16": "icons/icon-16-green.png",
+    "32": "icons/icon-32-green.png",
+    "48": "icons/icon-48-green.png",
+    "128": "icons/icon-128-green.png"
+  }
+}

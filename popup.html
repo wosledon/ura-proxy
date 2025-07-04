@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      width: 300px;
+      padding: 15px;
+      font-family: Arial, sans-serif;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    
+    .status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      padding: 10px;
+      background: #f0f0f0;
+      border-radius: 5px;
+    }
+    
+    .status-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    
+    .status-enabled {
+      background: #4CAF50;
+    }
+    
+    .status-disabled {
+      background: #f44336;
+    }
+    
+    .rules {
+      margin-bottom: 15px;
+    }
+    
+    .rule {
+      padding: 8px;
+      margin: 5px 0;
+      background: #e8f4f8;
+      border-radius: 3px;
+      font-size: 11px;
+      position: relative;
+    }
+    
+    .rule-from {
+      color: #d32f2f;
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+    
+    .rule-to {
+      color: #388e3c;
+      font-weight: bold;
+    }
+    
+    .rule-toggle {
+      display: none;
+    }
+    
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 34px;
+      height: 20px;
+    }
+    
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 20px;
+    }
+    
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .toggle-slider {
+      background-color: #4CAF50;
+    }
+    
+    input:checked + .toggle-slider:before {
+      transform: translateX(14px);
+    }
+    
+    .rules-list {
+      max-height: 150px;
+      overflow-y: auto;
+    }
+    
+    .no-rules {
+      text-align: center;
+      color: #666;
+      font-style: italic;
+      padding: 10px;
+    }
+    
+    button {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    /* 专门为状态切换按钮设置更小的样式 */
+    #toggleBtn {
+      width: auto;
+      padding: 5px 12px;
+      margin: 0;
+      font-size: 12px;
+      min-width: 50px;
+    }
+    
+    .btn-primary {
+      background: #2196F3;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #1976D2;
+    }
+    
+    .btn-danger {
+      background: #f44336;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #d32f2f;
+    }
+    
+    .btn-success {
+      background: #4CAF50;
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background: #45a049;
+    }
+    
+    .btn-warning {
+      background: #ff9800;
+      color: white;
+    }
+    
+    .btn-warning:hover {
+      background: #f57c00;
+    }
+    
+    .btn-refresh {
+      background: none;
+      border: none;
+      font-size: 15px;
+      cursor: pointer;
+      padding: 0 2px;
+      margin-left: 4px;
+      border-radius: 3px;
+      line-height: 1;
+      height: 20px;
+      width: 22px;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .btn-refresh:hover {
+      background: #f0f0f0;
+    }
+    
+    .rules h4 {
+      display: flex;
+      align-items: center;
+      font-size: 15px;
+      margin-bottom: 8px;
+      margin-top: 0;
+      font-weight: bold;
+      gap: 4px;
+    }
+  </style>
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h3>🔄 API请求重定向</h3>
+  </div>
+  
+  <div class="status">
+    <div style="display: flex; align-items: center;">
+      <div id="statusIndicator" class="status-indicator status-enabled"></div>
+      <span id="statusText">重定向已启用</span>
+    </div>
+    <button id="toggleBtn" class="btn-danger">禁用</button>
+  </div>
+  
+  <div class="rules">
+    <h4 style="display: flex; align-items: center; font-size: 15px; margin-bottom: 8px;">
+      📋 重定向规则
+      <button id="refreshRulesBtn" class="btn-refresh" title="刷新规则" style="margin-left: 8px; font-size: 15px;">🔄</button>
+    </h4>
+    <!-- 规则将通过JavaScript动态加载 -->
+  </div>
+  
+  <button id="openOptionsBtn" class="btn-primary">⚙️ 配置规则</button>
+  <button id="clearCacheBtn" class="btn-primary">🗑️ 清除缓存</button>
+  <button id="openRequestPanelBtn" class="btn-success" disabled style="opacity:0.5;cursor:not-allowed;">🎛️ 开启请求面板（已禁用）</button>
+  <button id="openDiagnosticBtn" class="btn-warning" disabled style="opacity:0.5;cursor:not-allowed;">🔧 诊断工具（已禁用）</button>
+  
+  <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 11px; color: #666; text-align: center;">
+    💡 刷新页面让规则生效
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
